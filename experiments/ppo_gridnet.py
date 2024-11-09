@@ -434,7 +434,9 @@ if __name__ == "__main__":
                 next_obs, rs, ds, infos = envs.step(action.cpu().numpy().reshape(envs.num_envs, -1))
                 next_obs = torch.Tensor(next_obs).to(device)
             except Exception as e:
-                e.printStackTrace()
+                print(f"Error during environment step: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 raise
             rewards[step], next_done = torch.Tensor(rs).to(device), torch.Tensor(ds).to(device)
 
