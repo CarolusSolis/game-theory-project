@@ -179,6 +179,32 @@ python ppo_gridnet.py \
 
 where `--train-maps` allows you to specify the training maps and `--eval-maps` the evaluation maps. `--train-maps` and `--eval-maps` do not have to match (so you can evaluate on maps the agent has never trained on before).
 
+## Training with Domain Randomization
+
+To improve the robustness and generalization of your agent, you can use domain randomization by training on multiple maps. Here's an example command that trains on different 16x16 maps:
+
+```bash
+python ppo_gridnet.py \
+    --prod-mode True \
+    --wandb-project-name game-theory-project-microrts \
+    --wandb-entity cmu-charlie-sun \
+    --train-maps \
+        maps/16x16/basesWorkers16x16A.xml \
+        maps/16x16/basesWorkers16x16B.xml \
+        maps/16x16/basesWorkers16x16C.xml \
+        maps/16x16/TwoBasesBarracks16x16.xml \
+    --eval-maps maps/16x16/basesWorkers16x16D.xml \
+    --num-selfplay-envs 48 \  # Increasing this boosts parallelization
+    --total-timesteps 10000000 \
+    --seed 1
+```
+
+This setup cycles through different map layouts during training:
+- `basesWorkers16x16A/B/C.xml`: Standard maps with different resource and base layouts
+- `TwoBasesBarracks16x16.xml`: A more complex map with barracks, encouraging diverse unit production strategies
+
+The environment will automatically cycle through these maps during training, helping the agent learn strategies that work across different scenarios.
+
 ## Known issues
 
 [ ] Rendering does not exactly work in macos. See https://github.com/jpype-project/jpype/issues/906
