@@ -54,6 +54,9 @@ def parse_args():
         help='the opponent AI to evaluate against')
     parser.add_argument('--model-type', type=str, default=f"ppo_gridnet", choices=["ppo_gridnet_large", "ppo_gridnet"],
         help='the output path of the leaderboard csv')
+    parser.add_argument('--eval-maps', nargs='+', type=str, 
+        default=["maps/16x16/basesWorkers16x16A.xml"],
+        help='the map paths to evaluate on')
     args = parser.parse_args()
     if not args.seed:
         args.seed = int(time.time())
@@ -117,7 +120,7 @@ if __name__ == "__main__":
         max_steps=5000,
         render_theme=2,
         ai2s=ais,
-        map_paths=["maps/16x16/basesWorkers16x16A.xml"],
+        map_paths=args.eval_maps,
         reward_weight=np.array([10.0, 1.0, 1.0, 0.2, 1.0, 4.0]),
     )
     envs = MicroRTSStatsRecorder(envs)
