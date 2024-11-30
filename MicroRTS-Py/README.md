@@ -41,11 +41,21 @@ If the `poetry install` command gets stuck on a Linux machine, [it may help to f
 To train an agent, run the following
 
 ```bash
-cd experiments
+# Train the agent
 python ppo_gridnet.py \
-    --total-timesteps 100000000 \
-    --capture-video \
+    --prod-mode True \
+    --wandb-project-name game-theory-project-microrts \
+    --wandb-entity cmu-charlie-sun \
+    --train-maps maps/16x16/basesWorkers16x16A.xml \
+    --eval-maps maps/16x16/basesWorkers16x16B.xml \
+    --total-timesteps 10000000 \
     --seed 1
+
+# Evaluate the trained agent against specific AI
+python ppo_gridnet_eval.py \
+    --agent-model-path models/MicroRTSGridModeVecEnv__ppo_gridnet__1__1731365294/9934848.pt \
+    --ai coacAI \
+    --eval-maps maps/16x16/basesWorkers16x16B.xml
 ```
 
 [![asciicast](https://asciinema.org/a/586754.svg)](https://asciinema.org/a/586754)
@@ -168,6 +178,32 @@ python ppo_gridnet.py \
 ```
 
 where `--train-maps` allows you to specify the training maps and `--eval-maps` the evaluation maps. `--train-maps` and `--eval-maps` do not have to match (so you can evaluate on maps the agent has never trained on before).
+
+## Training with Domain Randomization
+
+To improve the robustness and generalization of your agent, you can use domain randomization by training on multiple maps. Here's an example command that trains on different 16x16 maps:
+
+```bash
+python ppo_gridnet.py \
+    --prod-mode True \
+    --wandb-project-name game-theory-project-microrts \
+    --wandb-entity cmu-charlie-sun \
+    --train-maps \
+        maps/16x16/basesWorkers16x16A.xml \
+        maps/16x16/basesWorkers16x16B.xml \
+        maps/16x16/basesWorkers16x16C.xml \
+        maps/16x16/TwoBasesBarracks16x16.xml \
+    --eval-maps maps/16x16/basesWorkers16x16D.xml \
+    --num-selfplay-envs 48 \
+    --total-timesteps 10000000 \
+    --seed 1
+```
+
+This setup cycles through different map layouts during training:
+- `basesWorkers16x16A/B/C.xml`: Standard maps with different resource and base layouts
+- `TwoBasesBarracks16x16.xml`: A more complex map with barracks, encouraging diverse unit production strategies
+
+The environment will automatically cycle through these maps during training, helping the agent learn strategies that work across different scenarios.
 
 ## Known issues
 
