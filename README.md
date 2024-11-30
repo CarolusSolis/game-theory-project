@@ -41,11 +41,21 @@ If the `poetry install` command gets stuck on a Linux machine, [it may help to f
 To train an agent, run the following
 
 ```bash
-cd experiments
+# Train the agent
 python ppo_gridnet.py \
-    --total-timesteps 100000000 \
-    --capture-video \
+    --prod-mode True \
+    --wandb-project-name game-theory-project-microrts \
+    --wandb-entity cmu-charlie-sun \
+    --train-maps maps/16x16/basesWorkers16x16A.xml \
+    --eval-maps maps/16x16/basesWorkers16x16B.xml \
+    --total-timesteps 10000000 \
     --seed 1
+
+# Evaluate the trained agent against specific AI
+python ppo_gridnet_eval.py \
+    --agent-model-path models/MicroRTSGridModeVecEnv__ppo_gridnet__1__1731365294/9934848.pt \
+    --ai coacAI \
+    --eval-maps maps/16x16/basesWorkers16x16B.xml
 ```
 
 [![asciicast](https://asciinema.org/a/586754.svg)](https://asciinema.org/a/586754)

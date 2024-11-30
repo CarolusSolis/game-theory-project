@@ -137,3 +137,5 @@ dmypy.json
 
 # PyCharm
 .idea/
+
+experiments/gym-microrts-static-files/tmp/
