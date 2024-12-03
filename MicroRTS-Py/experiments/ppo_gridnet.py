@@ -20,6 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from gym_microrts import microrts_ai
 from gym_microrts.envs.vec_env import MicroRTSGridModeVecEnv
+from gym_microrts.envs.random_env import RandomizedMicroRTSGridModeVecEnv
 
 
 def parse_args():
@@ -41,8 +42,14 @@ def parse_args():
         help='if toggled, cuda will not be enabled by default')
     parser.add_argument('--prod-mode', type=lambda x: bool(strtobool(x)), default=False, nargs='?', const=True,
         help='run the script in production mode and use wandb to log outputs')
-    parser.add_argument('--capture-video', type=lambda x: bool(strtobool(x)), default=False, nargs='?', const=True,
-        help='whether to capture videos of the agent performances (check out `videos` folder)')
+    parser.add_argument('--resource-randomization', type=lambda x: bool(strtobool(x)), default=True, nargs='?', const=True,
+        help='if toggled, randomize resource amounts during reset')
+    parser.add_argument('--resource-min', type=int, default=5,
+        help='minimum amount of resources per resource unit')
+    parser.add_argument('--resource-max', type=int, default=15,
+        help='maximum amount of resources per resource unit')
+    parser.add_argument("--capture-video", type=lambda x: bool(strtobool(x)), default=False, nargs="?", const=True,
+        help="whether to capture videos of the agent performances (check out `videos` folder)")
     parser.add_argument('--wandb-project-name', type=str, default="gym-microrts",
         help="the wandb's project name")
     parser.add_argument('--wandb-entity', type=str, default=None,
@@ -328,19 +335,19 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = args.torch_deterministic
-    envs = MicroRTSGridModeVecEnv(
+    envs = RandomizedMicroRTSGridModeVecEnv(
         num_selfplay_envs=args.num_selfplay_envs,
         num_bot_envs=args.num_bot_envs,
         partial_obs=args.partial_obs,
         max_steps=2000,
         render_theme=2,
-        ai2s=[microrts_ai.coacAI for _ in range(args.num_bot_envs - 6)]
-        + [microrts_ai.randomBiasedAI for _ in range(min(args.num_bot_envs, 2))]
-        + [microrts_ai.lightRushAI for _ in range(min(args.num_bot_envs, 2))]
-        + [microrts_ai.workerRushAI for _ in range(min(args.num_bot_envs, 2))],
+        ai2s=[microrts_ai.coacAI for _ in range(args.num_bot_envs)],
         map_paths=[args.train_maps[0]],
         reward_weight=np.array([10.0, 1.0, 1.0, 0.2, 1.0, 4.0]),
         cycle_maps=args.train_maps,
+        resource_randomization=args.resource_randomization,
+        resource_min=args.resource_min,
+        resource_max=args.resource_max,
     )
     envs = MicroRTSStatsRecorder(envs, args.gamma)
     envs = VecMonitor(envs)
